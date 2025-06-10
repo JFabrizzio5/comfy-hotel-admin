@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import LoginForm from '@/components/LoginForm';
 import AdminDashboard from '@/components/AdminDashboard';
 import UserDashboard from '@/components/UserDashboard';
+import MaintenanceDashboard from '@/components/MaintenanceDashboard';
 import HelpChat from '@/components/HelpChat';
 
 const Index = () => {
@@ -77,7 +78,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Features Section */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="bg-white rounded-xl p-6 shadow-lg text-center transform hover:scale-105 transition-transform duration-200">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -110,7 +110,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Testimonials */}
           <div className="mb-12">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Lo que dicen nuestros huéspedes</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -176,6 +175,8 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       {currentUser.role === 'admin' ? (
         <AdminDashboard user={currentUser} onLogout={handleLogout} />
+      ) : currentUser.role === 'maintenance' ? (
+        <MaintenanceDashboard user={currentUser} onLogout={handleLogout} />
       ) : (
         <UserDashboard user={currentUser} onLogout={handleLogout} />
       )}

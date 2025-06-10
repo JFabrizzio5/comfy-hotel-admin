@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import UserModal from './UserModal';
 import RoomSearch from './RoomSearch';
 import LinkGuestModal from './LinkGuestModal';
+import RelayStatusPanel from './RelayStatusPanel';
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('users');
@@ -9,17 +10,17 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
 
-  // Generar 150 habitaciones
+  // Generar 150 habitaciones (1-150)
   const [users, setUsers] = useState([
     { id: 1, name: 'Juan Pérez', email: 'juan@hotel.com', active: true, room: '101' },
-    { id: 2, name: 'María García', email: 'maria@hotel.com', active: true, room: '205' },
-    { id: 3, name: 'Carlos López', email: 'carlos@hotel.com', active: false, room: '301' },
+    { id: 2, name: 'María García', email: 'maria@hotel.com', active: true, room: '120' },
+    { id: 3, name: 'Carlos López', email: 'carlos@hotel.com', active: false, room: '95' },
   ]);
 
   const [rooms, setRooms] = useState(() => {
     return Array.from({ length: 150 }, (_, i) => {
-      const roomNumber = 100 + i + 1;
-      const type = roomNumber < 130 ? 'Individual' : roomNumber < 145 ? 'Doble' : 'Suite';
+      const roomNumber = i + 1;
+      const type = roomNumber <= 50 ? 'Individual' : roomNumber <= 100 ? 'Doble' : 'Suite';
       
       // Asignar algunos huéspedes aleatoriamente
       let status = 'disponible';
@@ -28,15 +29,15 @@ const AdminDashboard = ({ user, onLogout }) => {
       if (roomNumber === 101) {
         status = 'ocupada';
         guest = 'Juan Pérez';
-      } else if (roomNumber === 205) {
+      } else if (roomNumber === 120) {
         status = 'ocupada';
         guest = 'María García';
-      } else if (roomNumber === 301) {
+      } else if (roomNumber === 95) {
         status = 'reservada';
         guest = 'Carlos López';
-      } else if (roomNumber % 10 === 0) {
+      } else if (roomNumber % 15 === 0) {
         status = 'mantenimiento';
-      } else if (roomNumber % 7 === 0) {
+      } else if (roomNumber % 12 === 0) {
         status = 'ocupada';
         guest = `Huésped ${Math.floor(Math.random() * 100)}`;
       }
@@ -169,6 +170,16 @@ const AdminDashboard = ({ user, onLogout }) => {
             >
               Gestión de Habitaciones
             </button>
+            <button
+              onClick={() => setActiveTab('relays')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'relays'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Estatus Relevadores
+            </button>
           </nav>
         </div>
       </div>
@@ -256,6 +267,13 @@ const AdminDashboard = ({ user, onLogout }) => {
               onUnlinkRoom={unlinkRoom}
               onLinkGuest={handleLinkGuest}
             />
+          </div>
+        )}
+
+        {activeTab === 'relays' && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Estatus de Relevadores</h2>
+            <RelayStatusPanel />
           </div>
         )}
       </div>
