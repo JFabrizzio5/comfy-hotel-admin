@@ -1,18 +1,21 @@
-
 import React, { useState } from 'react';
 import UserModal from './UserModal';
 import RoomSearch from './RoomSearch';
+import LinkGuestModal from './LinkGuestModal';
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('users');
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  // Generar 150 habitaciones
   const [users, setUsers] = useState([
     { id: 1, name: 'Juan Pérez', email: 'juan@hotel.com', active: true, room: '101' },
     { id: 2, name: 'María García', email: 'maria@hotel.com', active: true, room: '205' },
     { id: 3, name: 'Carlos López', email: 'carlos@hotel.com', active: false, room: '301' },
   ]);
 
-  // Generar 150 habitaciones
   const [rooms, setRooms] = useState(() => {
     return Array.from({ length: 150 }, (_, i) => {
       const roomNumber = 100 + i + 1;
@@ -52,7 +55,13 @@ const AdminDashboard = ({ user, onLogout }) => {
   };
 
   const addUser = (newUser) => {
-    setUsers([...users, { ...newUser, id: Date.now() }]);
+    const newUserId = Date.now();
+    setUsers([...users, { ...newUser, id: newUserId }]);
+    
+    // Si se asignó una habitación, actualizar el estado de la habitación
+    if (newUser.room) {
+      linkGuestToRoom(parseInt(newUser.room), { ...newUser, id: newUserId });
+    }
   };
 
   const unlinkRoom = (roomId) => {
@@ -61,6 +70,40 @@ const AdminDashboard = ({ user, onLogout }) => {
         room.id === roomId 
           ? { ...room, status: 'disponible', guest: null }
           : room
+      )
+    );
+
+    // También actualizar el usuario para quitar la habitación
+    setUsers(prevUsers =>
+      prevUsers.map(user =>
+        user.room === roomId.toString()
+          ? { ...user, room: '' }
+          : user
+      )
+    );
+  };
+
+  const handleLinkGuest = (room) => {
+    setSelectedRoom(room);
+    setShowLinkModal(true);
+  };
+
+  const linkGuestToRoom = (roomId, selectedUser) => {
+    // Actualizar la habitación
+    setRooms(prevRooms =>
+      prevRooms.map(room =>
+        room.id === roomId
+          ? { ...room, status: 'ocupada', guest: selectedUser.name }
+          : room
+      )
+    );
+
+    // Actualizar el usuario
+    setUsers(prevUsers =>
+      prevUsers.map(user =>
+        user.id === selectedUser.id
+          ? { ...user, room: roomId.toString() }
+          : user
       )
     );
   };
@@ -175,7 +218,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {user.room}
+                          {user.room || 'Sin asignar'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -208,7 +251,11 @@ const AdminDashboard = ({ user, onLogout }) => {
         {activeTab === 'rooms' && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Habitaciones</h2>
-            <RoomSearch rooms={rooms} onUnlinkRoom={unlinkRoom} />
+            <RoomSearch 
+              rooms={rooms} 
+              onUnlinkRoom={unlinkRoom}
+              onLinkGuest={handleLinkGuest}
+            />
           </div>
         )}
       </div>
@@ -217,6 +264,18 @@ const AdminDashboard = ({ user, onLogout }) => {
         <UserModal
           onClose={() => setShowUserModal(false)}
           onSave={addUser}
+        />
+      )}
+
+      {showLinkModal && selectedRoom && (
+        <LinkGuestModal
+          room={selectedRoom}
+          users={users}
+          onClose={() => {
+            setShowLinkModal(false);
+            setSelectedRoom(null);
+          }}
+          onLink={linkGuestToRoom}
         />
       )}
     </div>

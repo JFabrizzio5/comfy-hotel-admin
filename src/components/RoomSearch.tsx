@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
-const RoomSearch = ({ rooms, onUnlinkRoom }) => {
+const RoomSearch = ({ rooms, onUnlinkRoom, onLinkGuest }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,7 +75,7 @@ const RoomSearch = ({ rooms, onUnlinkRoom }) => {
               <p className="text-sm text-gray-600">
                 <span className="font-medium">Tipo:</span> {room.type}
               </p>
-              {room.guest && (
+              {room.guest ? (
                 <>
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Huésped:</span> {room.guest}
@@ -87,6 +87,13 @@ const RoomSearch = ({ rooms, onUnlinkRoom }) => {
                     Desvincular Huésped
                   </button>
                 </>
+              ) : (
+                <button
+                  onClick={() => onLinkGuest(room)}
+                  className="w-full mt-2 px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200 text-sm font-medium"
+                >
+                  Vincular Huésped
+                </button>
               )}
             </div>
           </div>
@@ -118,7 +125,6 @@ const RoomSearch = ({ rooms, onUnlinkRoom }) => {
                   </PaginationItem>
                 );
               }
-              // Para más de 5 páginas, mostrar lógica más compleja
               return null;
             })}
             <PaginationItem>
@@ -131,7 +137,6 @@ const RoomSearch = ({ rooms, onUnlinkRoom }) => {
         </Pagination>
       )}
 
-      {/* Información de resultados */}
       <div className="mt-4 text-sm text-gray-600 text-center">
         Mostrando {startIndex + 1}-{Math.min(startIndex + roomsPerPage, filteredRooms.length)} de {filteredRooms.length} habitaciones
       </div>
