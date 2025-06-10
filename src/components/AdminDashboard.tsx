@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import UserModal from './UserModal';
+import RoomSearch from './RoomSearch';
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('users');
@@ -11,14 +12,40 @@ const AdminDashboard = ({ user, onLogout }) => {
     { id: 3, name: 'Carlos López', email: 'carlos@hotel.com', active: false, room: '301' },
   ]);
 
-  const [rooms] = useState([
-    { id: 101, status: 'ocupada', guest: 'Juan Pérez', type: 'Individual' },
-    { id: 102, status: 'disponible', guest: null, type: 'Individual' },
-    { id: 201, status: 'mantenimiento', guest: null, type: 'Doble' },
-    { id: 202, status: 'disponible', guest: null, type: 'Doble' },
-    { id: 205, status: 'ocupada', guest: 'María García', type: 'Suite' },
-    { id: 301, status: 'reservada', guest: 'Carlos López', type: 'Suite' },
-  ]);
+  // Generar 150 habitaciones
+  const [rooms, setRooms] = useState(() => {
+    return Array.from({ length: 150 }, (_, i) => {
+      const roomNumber = 100 + i + 1;
+      const type = roomNumber < 130 ? 'Individual' : roomNumber < 145 ? 'Doble' : 'Suite';
+      
+      // Asignar algunos huéspedes aleatoriamente
+      let status = 'disponible';
+      let guest = null;
+      
+      if (roomNumber === 101) {
+        status = 'ocupada';
+        guest = 'Juan Pérez';
+      } else if (roomNumber === 205) {
+        status = 'ocupada';
+        guest = 'María García';
+      } else if (roomNumber === 301) {
+        status = 'reservada';
+        guest = 'Carlos López';
+      } else if (roomNumber % 10 === 0) {
+        status = 'mantenimiento';
+      } else if (roomNumber % 7 === 0) {
+        status = 'ocupada';
+        guest = `Huésped ${Math.floor(Math.random() * 100)}`;
+      }
+      
+      return {
+        id: roomNumber,
+        status,
+        guest,
+        type
+      };
+    });
+  });
 
   const toggleUserStatus = (userId) => {
     setUsers(users.map(u => u.id === userId ? { ...u, active: !u.active } : u));
@@ -26,6 +53,16 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const addUser = (newUser) => {
     setUsers([...users, { ...newUser, id: Date.now() }]);
+  };
+
+  const unlinkRoom = (roomId) => {
+    setRooms(prevRooms => 
+      prevRooms.map(room => 
+        room.id === roomId 
+          ? { ...room, status: 'disponible', guest: null }
+          : room
+      )
+    );
   };
 
   const getStatusColor = (status) => {
@@ -87,7 +124,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Estado de Habitaciones
+              Gestión de Habitaciones
             </button>
           </nav>
         </div>
@@ -170,29 +207,8 @@ const AdminDashboard = ({ user, onLogout }) => {
 
         {activeTab === 'rooms' && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Estado de Habitaciones</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rooms.map((room) => (
-                <div key={room.id} className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Habitación {room.id}</h3>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(room.status)}`}>
-                      {room.status}
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium">Tipo:</span> {room.type}
-                    </p>
-                    {room.guest && (
-                      <p className="text-sm text-gray-600">
-                        <span className="font-medium">Huésped:</span> {room.guest}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Habitaciones</h2>
+            <RoomSearch rooms={rooms} onUnlinkRoom={unlinkRoom} />
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ const UserModal = ({ onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
     room: '',
     active: true
   });
@@ -22,6 +23,13 @@ const UserModal = ({ onClose, onSave }) => {
       [name]: type === 'checkbox' ? checked : value
     }));
   };
+
+  // Generar 150 habitaciones disponibles
+  const availableRooms = Array.from({ length: 150 }, (_, i) => {
+    const roomNumber = 100 + i + 1;
+    const type = roomNumber < 130 ? 'Individual' : roomNumber < 145 ? 'Doble' : 'Suite';
+    return { number: roomNumber, type };
+  });
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -73,6 +81,21 @@ const UserModal = ({ onClose, onSave }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+              placeholder="Ingrese una contraseña"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Habitación Asignada
             </label>
             <select
@@ -83,10 +106,11 @@ const UserModal = ({ onClose, onSave }) => {
               required
             >
               <option value="">Seleccionar habitación</option>
-              <option value="102">102 - Individual</option>
-              <option value="202">202 - Doble</option>
-              <option value="302">302 - Suite</option>
-              <option value="401">401 - Suite Premium</option>
+              {availableRooms.map((room) => (
+                <option key={room.number} value={room.number}>
+                  {room.number} - {room.type}
+                </option>
+              ))}
             </select>
           </div>
 
